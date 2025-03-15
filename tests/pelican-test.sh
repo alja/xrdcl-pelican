@@ -23,13 +23,13 @@ if [ ! -d "$BINARY_DIR" ]; then
   exit 1
 fi
 
-echo "Running $TEST_NAME - simple download"
-
 if [ ! -f "$BINARY_DIR/tests/$TEST_NAME/setup.sh" ]; then
   echo "Test environment file $BINARY_DIR/tests/$TEST_NAME/setup.sh does not exist - cannot run test"
   exit 1
 fi
 . "$BINARY_DIR/tests/$TEST_NAME/setup.sh"
+
+echo "Running $TEST_NAME - simple download"
 
 CONTENTS=$(curl --cacert "$X509_CA_FILE" -v -L --fail -H "@$HEADER_FILE" "$FEDERATION_URL/test/hello_world.txt" 2>> "$BINARY_DIR/tests/$TEST_NAME/client.log")
 CURL_EXIT=$?
@@ -43,6 +43,25 @@ fi
 
 if [ "$CONTENTS" != "Hello, World" ]; then
   echo "Downloaded hello-world text is incorrect: $CONTENTS"
+  exit 1
+fi
+
+echo "Running $TEST_NAME - checksum query"
+
+CONTENTS=$(curl -I --cacert "$X509_CA_FILE" -v -L --fail -H 'Want-Digest: md5' -H "@$HEADER_FILE" "$FEDERATION_URL/test/hello_world.txt" 2>> "$BINARY_DIR/tests/$TEST_NAME/client.log")
+CURL_EXIT=$?
+
+if [ $CURL_EXIT -ne 0 ]; then
+  cat "$BINARY_DIR/tests/$TEST_NAME/pelican.log"
+  cat "$BINARY_DIR/tests/$TEST_NAME/client.log"
+  echo "Checksum of hello-world text failed"
+  exit 1
+fi
+
+if [ "$(echo "$CONTENTS" | grep -c 'Digest: md5=mvL4IYsVDDUa2ALG89Zqvg==')" -ne "1" ]; then
+  cat "$BINARY_DIR/tests/$TEST_NAME/pelican.log"
+  cat "$BINARY_DIR/tests/$TEST_NAME/client.log"
+  cat "Digest incorrect or missing"
   exit 1
 fi
 
@@ -95,7 +114,7 @@ assert_eq 3 "$(wc -l "$BINARY_DIR/tests/$TEST_NAME/xrdfs.out" | awk '{print $1}'
 ##
 # Ensure that the 'access_token' argument is being used with the cache token
 
-if ! grep -q 'http_Protocol:  Parsing first line: PROPFIND /test-public/subdir/test3?access_token=REDACTED HTTP/1.1" daemon=xrootd.origin' "$BINARY_DIR/tests/$TEST_NAME/pelican.log"; then
+if ! grep -E -q 'http_Protocol:  Parsing first line: PROPFIND /test-public/subdir/test3\?access_token=REDACTED HTTP/1.1"? .*xrootd.origin' "$BINARY_DIR/tests/$TEST_NAME/pelican.log"; then
   echo "access_token not specified in the xrootd origin log"
   exit 1
 fi
