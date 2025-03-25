@@ -24,6 +24,7 @@
 #include <XrdCl/XrdClDefaultEnv.hh>
 #include <XrdCl/XrdClLog.hh>
 #include <XrdCl/XrdClXRootDResponses.hh>
+#include <XrdCl/XrdClFileSystem.hh>
 #include <XrdOuc/XrdOucCRC.hh>
 #include <XrdSys/XrdSysPageSize.hh>
 
@@ -480,6 +481,26 @@ CurlOpenOp::Success()
     CurlStatOp::Success();
 }
 
+//
+// ------------------------ BEGIN QUERY OPS -------
+//
+void CurlQueryOp::Success()
+{
+    SetDone();
+    m_logger->Debug(kLogXrdClPelican, "CurlQueryOp::Success");
+
+    XrdCl::Buffer* qInfo = new XrdCl::Buffer();
+    qInfo->FromString(m_headers.GetETag());
+    auto obj = new XrdCl::AnyObject();
+    obj->Set(qInfo);
+
+
+    m_handler->HandleResponse(new XrdCl::XRootDStatus(), obj);
+    m_handler = nullptr;
+}
+//
+//---------------------------- END QUERY  OPS ----
+//
 CurlReadOp::CurlReadOp(XrdCl::ResponseHandler *handler, const std::string &url, struct timespec timeout,
     const std::pair<uint64_t, uint64_t> &op, char *buffer, XrdCl::Log *logger) :
         CurlOperation(handler, url, timeout, logger),

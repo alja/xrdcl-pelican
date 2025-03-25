@@ -345,6 +345,10 @@ bool HeaderParser::Parse(const std::string &headers)
     else if (header_name == "X-Osdf-X509" && header_value == "true") {
         m_x509_auth = true;
     }
+    else if (header_name == "Etag") {
+        m_etag = header_value;
+        m_etag.erase(remove( m_etag.begin(), m_etag.end(), '\"' ),m_etag.end());
+    }
 
     return true;
 }

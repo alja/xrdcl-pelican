@@ -106,6 +106,8 @@ public:
 
     const std::string &GetBroker() const {return m_broker;}
 
+    const std::string &GetETag() const {return m_etag;}
+
     const std::tuple<std::string, unsigned> GetMirrorInfo() const {return std::make_tuple(m_mirror_url, m_mirror_depth);}
 
     static std::tuple<std::string_view, int, bool> ParseInt(const std::string_view &val);
@@ -149,6 +151,7 @@ private:
     std::string m_location;
     std::string m_broker;
     std::string m_mirror_url;
+    std::string m_etag;
 };
 
 /**

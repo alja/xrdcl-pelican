@@ -204,6 +204,26 @@ private:
     File *m_file{nullptr};
 };
 
+//
+//  Cache control query
+//
+class CurlQueryOp final : public CurlStatOp {
+public:
+    CurlQueryOp(XrdCl::ResponseHandler *handler, const std::string &url, struct timespec timeout,
+        XrdCl::Log *logger, bool is_pelican, bool is_origin, const DirectorCache *dcache, int queryCode):
+        CurlStatOp(handler, url, timeout, logger, is_pelican, is_origin, dcache),
+        m_queryCode(queryCode)
+        {}
+
+    virtual ~CurlQueryOp() {}
+
+    void Success() override;
+
+    int  m_queryCode;
+    std::string m_queryVal;
+};
+
+
 class CurlReadOp : public CurlOperation {
 public:
     CurlReadOp(XrdCl::ResponseHandler *handler, const std::string &url, struct timespec timeout,

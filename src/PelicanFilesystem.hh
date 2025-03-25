@@ -51,6 +51,12 @@ public:
                                      XrdCl::ResponseHandler *handler,
                                      timeout_t               timeout) override;
 
+    virtual XrdCl::XRootDStatus Query(XrdCl::QueryCode::Code  queryCode,
+                                        const XrdCl::Buffer    &arg,
+                                        XrdCl::ResponseHandler *handler,
+                                        uint16_t         timeout = 0 ) override;
+
+
     virtual XrdCl::XRootDStatus DirList(const std::string          &path,
                                         XrdCl::DirListFlags::Flags  flags,
                                         XrdCl::ResponseHandler     *handler,

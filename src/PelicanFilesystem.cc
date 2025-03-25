@@ -124,6 +124,32 @@ Filesystem::Stat(const std::string      &path,
     return XrdCl::XRootDStatus();
 }
 
+
+XrdCl::XRootDStatus
+Filesystem::Query(XrdCl::QueryCode::Code  queryCode,
+                  const XrdCl::Buffer    &arg,
+                  XrdCl::ResponseHandler *handler,
+                  timeout_t               timeout)
+{
+    const DirectorCache *dcache{nullptr};
+    std::string full_url;
+   bool is_pelican{false};
+    bool is_cached{false};
+   struct timespec ts;
+
+    std::string path = arg.ToString();
+    full_url = m_url.GetURL();
+
+    std::unique_ptr<CurlQueryOp> statOp(new CurlQueryOp(handler, full_url, ts, m_logger, is_pelican, is_cached, dcache, queryCode));
+    try {
+        m_queue->Produce(std::move(statOp));
+    } catch (...) {
+        m_logger->Warning(kLogXrdClPelican, "Failed to add stat op to queue");
+        return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errOSError);
+    }
+    return XrdCl::XRootDStatus();
+}
+
 struct timespec
 Filesystem::GetHeaderTimeout(time_t oper_timeout, const std::string &header_value)
 {
