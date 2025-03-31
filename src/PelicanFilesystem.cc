@@ -133,9 +133,9 @@ Filesystem::Query(XrdCl::QueryCode::Code  queryCode,
 {
     const DirectorCache *dcache{nullptr};
     std::string full_url;
-   bool is_pelican{false};
+    bool is_pelican{false};
     bool is_cached{false};
-   struct timespec ts;
+    struct timespec ts;
 
     std::string path = arg.ToString();
     full_url = m_url.GetURL();

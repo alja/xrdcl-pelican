@@ -491,7 +491,8 @@ void CurlQueryOp::Success()
     m_logger->Debug(kLogXrdClPelican, "CurlQueryOp::Success");
 
     XrdCl::Buffer* qInfo = new XrdCl::Buffer();
-    qInfo->FromString(m_headers.GetETag());
+    if (m_queryCode == XrdCl::QueryCode::XAttr)
+        qInfo->FromString(m_headers.GetETag());
     auto obj = new XrdCl::AnyObject();
     obj->Set(qInfo);
 
