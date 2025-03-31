@@ -461,6 +461,7 @@ CurlOpenOp::Success()
     curl_easy_getinfo(m_curl.get(), CURLINFO_EFFECTIVE_URL, &url);
     if (url && m_file) {
         m_file->SetProperty("LastURL", url);
+        m_file->SetProperty("ETag", m_headers.GetETag());
     }
     if (UseX509Auth() && m_file) {
         m_file->SetProperty("UseX509Auth", "true");

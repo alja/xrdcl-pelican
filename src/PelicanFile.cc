@@ -219,6 +219,34 @@ File::Stat(bool                    /*force*/,
 }
 
 XrdCl::XRootDStatus
+File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
+           timeout_t               timeout)
+{
+    // AMT, do we need this condition ?
+    if (!m_is_opened) {
+        m_logger->Error(kLogXrdClPelican, "Cannot stat.  URL isn't open");
+        return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+    }
+    auto obj = new XrdCl::AnyObject();
+
+    // check here the query code from the handler
+    std::string as = arg.ToString();
+    XrdCl::QueryCode::Code code = (XrdCl::QueryCode::Code)std::stoi(as);
+    if (code == XrdCl::QueryCode::XAttr)
+    {
+        std::string etagRes;
+        m_logger->Debug(kLogXrdClPelican, "Going to access ETag");
+        GetProperty("ETag", etagRes);
+        XrdCl::Buffer* respBuff = new XrdCl::Buffer();
+        respBuff->FromString(etagRes);
+        obj->Set(respBuff);
+    }
+
+    handler->HandleResponse(new XrdCl::XRootDStatus(), obj);
+    return XrdCl::XRootDStatus();
+}
+
+XrdCl::XRootDStatus
 File::Read(uint64_t                offset,
            uint32_t                size,
            void                   *buffer,
