@@ -349,6 +349,21 @@ bool HeaderParser::Parse(const std::string &headers)
         m_etag = header_value;
         m_etag.erase(remove( m_etag.begin(), m_etag.end(), '\"' ),m_etag.end());
     }
+    else if (header_name == "Cache-Control") {
+        m_cache_control = header_value;
+        /*
+        std::stringstream ss(header_value);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            std::stringstream ss_space(token);
+            std::string sub_token;
+            while (std::getline(ss_space, sub_token, ' ')) {
+                if (!sub_token.empty()) {
+                    m_cache_control.push_back(sub_token);
+                }
+            }
+        }*/
+    }
 
     return true;
 }
@@ -472,6 +487,18 @@ std::tuple<std::string_view, std::string, bool> HeaderParser::ParseString(const 
         }
     }
     return std::make_tuple("", "", false);
+}
+
+std::vector<std::string> HeaderParser::SplitStringToVec(const std::string& str, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(str);
+    std::string token;
+    while (std::getline(ss, token, delimiter)) {
+        if (token[0] == ' ') { token.erase(0,1); }
+        tokens.push_back(token);
+    }
+    return tokens;
 }
 
 namespace {

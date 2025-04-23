@@ -20,12 +20,14 @@
 #include "CurlUtil.hh"
 #include "CurlWorker.hh"
 #include "PelicanFile.hh"
+#include "XrdOucJson.hh"
 
 #include <XrdCl/XrdClDefaultEnv.hh>
 #include <XrdCl/XrdClLog.hh>
 #include <XrdCl/XrdClXRootDResponses.hh>
 #include <XrdCl/XrdClFileSystem.hh>
 #include <XrdOuc/XrdOucCRC.hh>
+// #include <XrdOuc/XrdOucJson.hh>
 #include <XrdSys/XrdSysPageSize.hh>
 
 #include <curl/curl.h>
@@ -85,7 +87,7 @@ bool
 CurlOperation::Header(const std::string &header)
 {
     auto result = m_headers.Parse(header);
-    // m_logger->Debug(kLogXrdClPelican, "Got header: %s", header.c_str());
+    m_logger->Debug(kLogXrdClPelican, "Got header: %s", header.c_str());
     if (!result) {
         m_logger->Debug(kLogXrdClPelican, "Failed to parse response header: %s", header.c_str());
     }
@@ -491,8 +493,17 @@ void CurlQueryOp::Success()
     m_logger->Debug(kLogXrdClPelican, "CurlQueryOp::Success");
 
     XrdCl::Buffer* qInfo = new XrdCl::Buffer();
-    if (m_queryCode == XrdCl::QueryCode::XAttr)
-        qInfo->FromString(m_headers.GetETag());
+    if (m_queryCode == XrdCl::QueryCode::XAttr) {
+        nlohmann::json xatt;
+        xatt["ETag"] = m_headers.GetETag();
+        std::string cc = m_headers.GetCacheControl();
+        if (!cc.empty()) {
+            std::vector<std::string> sv = HeaderParser::SplitStringToVec(cc, ',');
+            xatt["Cache-Control"] = nlohmann::json(sv);
+        }
+        std::cout << "CurlQueryOp " << xatt.dump(3) << "\n";
+        qInfo->FromString(xatt.dump());
+    }
     auto obj = new XrdCl::AnyObject();
     obj->Set(qInfo);
 

@@ -107,11 +107,13 @@ public:
     const std::string &GetBroker() const {return m_broker;}
 
     const std::string &GetETag() const {return m_etag;}
+    const std::string &GetCacheControl() const {return m_cache_control;}
 
     const std::tuple<std::string, unsigned> GetMirrorInfo() const {return std::make_tuple(m_mirror_url, m_mirror_depth);}
 
     static std::tuple<std::string_view, int, bool> ParseInt(const std::string_view &val);
     static std::tuple<std::string_view, std::string, bool> ParseString(const std::string_view &val);
+    static std::vector<std::string> SplitStringToVec(const std::string& str, char delimiter);
 
     // An entry in the `link` header, as defined by RFC 5988 and used by RFC 6249
     class LinkEntry {
@@ -152,6 +154,7 @@ private:
     std::string m_broker;
     std::string m_mirror_url;
     std::string m_etag;
+    std::string m_cache_control;
 };
 
 /**

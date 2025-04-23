@@ -22,6 +22,8 @@
 #include "CurlOps.hh"
 #include "CurlUtil.hh"
 #include "DirectorCache.hh"
+#include "XrdOucJson.hh"
+#include <iostream>
 
 #include <XrdCl/XrdClConstants.hh>
 #include <XrdCl/XrdClDefaultEnv.hh>
@@ -234,11 +236,21 @@ File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
     XrdCl::QueryCode::Code code = (XrdCl::QueryCode::Code)std::stoi(as);
     if (code == XrdCl::QueryCode::XAttr)
     {
-        std::string etagRes;
+        nlohmann::json xatt;
         m_logger->Debug(kLogXrdClPelican, "Going to access ETag");
-        GetProperty("ETag", etagRes);
+        std::string etagRes;
+        if (GetProperty("ETag", etagRes)) {
+           xatt["ETag"] = etagRes;
+        }
+        std::string cc;
+        if (GetProperty("Cache-Control", cc))
+        {
+            std::vector<std::string> sv = HeaderParser::SplitStringToVec(cc, ',');
+            xatt["Cache-Control"] = nlohmann::json(sv);
+        }
         XrdCl::Buffer* respBuff = new XrdCl::Buffer();
-        respBuff->FromString(etagRes);
+        std::cout << "File::Fcntl " << xatt.dump(3) << "\n";
+        respBuff->FromString(xatt.dump());
         obj->Set(respBuff);
     }
 
