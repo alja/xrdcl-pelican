@@ -20,7 +20,7 @@
 #include "CurlUtil.hh"
 #include "CurlWorker.hh"
 #include "PelicanFile.hh"
-#include "XrdOucJson.hh"
+#include <nlohmann/json.hpp>
 
 #include <XrdCl/XrdClDefaultEnv.hh>
 #include <XrdCl/XrdClLog.hh>

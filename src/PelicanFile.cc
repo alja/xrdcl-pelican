@@ -22,7 +22,7 @@
 #include "CurlOps.hh"
 #include "CurlUtil.hh"
 #include "DirectorCache.hh"
-#include "XrdOucJson.hh"
+#include <nlohmann/json.hpp>
 #include <iostream>
 
 #include <XrdCl/XrdClConstants.hh>
