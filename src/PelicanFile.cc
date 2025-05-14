@@ -24,6 +24,7 @@
 #include "DirectorCache.hh"
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <regex>
 
 #include <XrdCl/XrdClConstants.hh>
 #include <XrdCl/XrdClDefaultEnv.hh>
@@ -245,8 +246,16 @@ File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
         std::string cc;
         if (GetProperty("Cache-Control", cc))
         {
-            std::vector<std::string> sv = HeaderParser::SplitStringToVec(cc, ',');
-            xatt["Cache-Control"] = nlohmann::json(sv);
+            if (cc.find("must-revalidate") != std::string::npos) {
+                xatt["revalidate"] = true;
+            }
+            static const std::regex rx("max-age=(\\d+)");
+            std::smatch m;
+            if (std::regex_search(cc, m, rx)) {
+                long int a = std::stol(m[1]);
+                time_t t = time(NULL) + a;
+                xatt["expire"] = t;
+            }
         }
         XrdCl::Buffer* respBuff = new XrdCl::Buffer();
         std::cout << "File::Fcntl " << xatt.dump(3) << "\n";
