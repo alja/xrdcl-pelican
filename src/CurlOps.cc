@@ -464,6 +464,7 @@ CurlOpenOp::Success()
     if (url && m_file) {
         m_file->SetProperty("LastURL", url);
         m_file->SetProperty("ETag", m_headers.GetETag());
+        m_file->SetProperty("Cache-Control", m_headers.GetCacheControl());
     }
     if (UseX509Auth() && m_file) {
         m_file->SetProperty("UseX509Auth", "true");
