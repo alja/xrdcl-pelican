@@ -29,6 +29,10 @@
 #include <XrdCl/XrdClStatus.hh>
 #include <XrdCl/XrdClURL.hh>
 
+#include <nlohmann/json.hpp>
+#include <iostream>
+#include <regex>
+
 using namespace XrdClCurl;
 
 // Note: these values are typically overwritten by `CurlFactory::CurlFactory`;
@@ -265,11 +269,29 @@ File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
     XrdCl::QueryCode::Code code = (XrdCl::QueryCode::Code)std::stoi(as);
     if (code == XrdCl::QueryCode::XAttr)
     {
-        std::string etagRes;
+        nlohmann::json xatt;
         m_logger->Debug(kLogXrdClCurl, "Going to access ETag");
-        GetProperty("ETag", etagRes);
+        std::string etagRes;
+        if (GetProperty("ETag", etagRes)) {
+           xatt["ETag"] = etagRes;
+        }
+        std::string cc;
+        if (GetProperty("Cache-Control", cc))
+        {
+            if (cc.find("must-revalidate") != std::string::npos) {
+                xatt["revalidate"] = true;
+            }
+            static const std::regex rx("max-age=(\\d+)");
+            std::smatch m;
+            if (std::regex_search(cc, m, rx)) {
+                long int a = std::stol(m[1]);
+                time_t t = time(NULL) + a;
+                xatt["expire"] = t;
+            }
+        }
         XrdCl::Buffer* respBuff = new XrdCl::Buffer();
-        respBuff->FromString(etagRes);
+        std::cout << "File::Fcntl " << xatt.dump(3) << "\n";
+        respBuff->FromString(xatt.dump());
         obj->Set(respBuff);
     }
 
