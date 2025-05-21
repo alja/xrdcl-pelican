@@ -49,6 +49,9 @@ CurlOpenOp::SetOpenProperties()
     if (url && m_file) {
         m_file->SetProperty("LastURL", url);
     }
+    // How do I get ETag here ???
+    // std::string etag = something.Get("ETag");
+    //  m_file->SetProperty("ETag", etag);
 }
 
 void
