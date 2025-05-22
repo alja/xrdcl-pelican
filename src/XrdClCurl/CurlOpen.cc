@@ -49,7 +49,7 @@ CurlOpenOp::SetOpenProperties()
     if (url && m_file) {
         m_file->SetProperty("LastURL", url);
     }
-    // AMT, meed the ETag value here  for File::Fcntl query
+    // AMT, need the ETag value here  for File::Fcntl query
     // std::string etag = something.Get("ETag");
     //  m_file->SetProperty("ETag", etag);
 }
