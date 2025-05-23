@@ -20,8 +20,10 @@
 #include "CurlOps.hh"
 
 #include <XrdCl/XrdClLog.hh>
+#include "../common/CurlResponseInfo.hh"
+#include "../common/CurlResponses.hh"
 
-
+#include <iostream>
 using namespace XrdClCurl;
 
 CurlOpenOp::CurlOpenOp(XrdCl::ResponseHandler *handler, const std::string &url, struct timespec timeout,
@@ -48,6 +50,22 @@ CurlOpenOp::SetOpenProperties()
     curl_easy_getinfo(m_curl.get(), CURLINFO_EFFECTIVE_URL, &url);
     if (url && m_file) {
         m_file->SetProperty("LastURL", url);
+    }
+
+    auto hm = m_headers.RefHeaders();
+    ResponseInfo::HeaderValues hv = hm["Etag"];
+    if (!hv.empty())
+    {
+        // std::cout << "ETAG " << hv[0] << "\n";
+        std::string etag = hv[0];
+        etag.erase(remove(etag.begin(), etag.end(), '\"'), etag.end());
+        m_file->SetProperty("ETag", etag);
+    }
+    hv = hm["Cache-Control"];
+    if (!hv.empty())
+    {
+        // std::cout << "xxx Cache Control " << hv[0] << "\n";
+        m_file->SetProperty("Cache-Control", hv[0]);
     }
 }
 
