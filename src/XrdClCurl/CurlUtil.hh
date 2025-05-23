@@ -125,6 +125,8 @@ public:
     // Convert a checksum type to a RFC 3230 digest name.
     static std::string ChecksumTypeToDigestName(XrdClCurl::ChecksumType type);
 
+    const ResponseInfo::HeaderMap& RefHeaders() const { return m_headers; }
+
 private:
 
     static bool validHeaderByte(unsigned char c);
