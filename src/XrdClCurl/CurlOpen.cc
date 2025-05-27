@@ -64,7 +64,6 @@ CurlOpenOp::SetOpenProperties()
     hv = hm["Cache-Control"];
     if (!hv.empty())
     {
-        // std::cout << "xxx Cache Control " << hv[0] << "\n";
         m_file->SetProperty("Cache-Control", hv[0]);
     }
 }

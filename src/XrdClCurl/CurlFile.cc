@@ -257,42 +257,50 @@ XrdCl::XRootDStatus
 File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
            timeout_t               timeout)
 {
-    // AMT, do we need this condition ?
     if (!m_is_opened) {
-        m_logger->Error(kLogXrdClCurl, "Cannot stat.  URL isn't open");
+        m_logger->Error(kLogXrdClCurl, "Cannot run fcntl.  URL isn't open");
         return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
     }
-    auto obj = new XrdCl::AnyObject();
 
-    // check here the query code from the handler
+    auto obj = new XrdCl::AnyObject();
     std::string as = arg.ToString();
-    XrdCl::QueryCode::Code code = (XrdCl::QueryCode::Code)std::stoi(as);
-    if (code == XrdCl::QueryCode::XAttr)
+    try
     {
-        nlohmann::json xatt;
-        m_logger->Debug(kLogXrdClCurl, "Going to access ETag");
-        std::string etagRes;
-        if (GetProperty("ETag", etagRes)) {
-           xatt["ETag"] = etagRes;
-        }
-        std::string cc;
-        if (GetProperty("Cache-Control", cc))
+        XrdCl::QueryCode::Code code = (XrdCl::QueryCode::Code)std::stoi(as);
+        if (code == XrdCl::QueryCode::XAttr)
         {
-            if (cc.find("must-revalidate") != std::string::npos) {
-                xatt["revalidate"] = true;
+            nlohmann::json xatt;
+            std::string etagRes;
+            if (GetProperty("ETag", etagRes))
+            {
+                xatt["ETag"] = etagRes;
             }
-            static const std::regex rx("max-age=(\\d+)");
-            std::smatch m;
-            if (std::regex_search(cc, m, rx)) {
-                long int a = std::stol(m[1]);
-                time_t t = time(NULL) + a;
-                xatt["expire"] = t;
+            std::string cc;
+            if (GetProperty("Cache-Control", cc))
+            {
+                if (cc.find("must-revalidate") != std::string::npos)
+                {
+                    xatt["revalidate"] = true;
+                }
+                static const std::regex rx("max-age=(\\d+)");
+                std::smatch m;
+                if (std::regex_search(cc, m, rx))
+                {
+                    long int a = std::stol(m[1]);
+                    time_t t = time(NULL) + a;
+                    xatt["expire"] = t;
+                }
             }
+            XrdCl::Buffer *respBuff = new XrdCl::Buffer();
+            m_logger->Debug(kLogXrdClCurl, "Fcntl conent %s", xatt.dump().c_str());
+            respBuff->FromString(xatt.dump());
+            obj->Set(respBuff);
         }
-        XrdCl::Buffer* respBuff = new XrdCl::Buffer();
-        std::cout << "File::Fcntl " << xatt.dump(3) << "\n";
-        respBuff->FromString(xatt.dump());
-        obj->Set(respBuff);
+    }
+    catch (const std::exception& e)
+    {
+        m_logger->Warning(kLogXrdClCurl, "Failed to parse query code %s", e.what());
+        return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errDataError);
     }
 
     handler->HandleResponse(new XrdCl::XRootDStatus(), obj);
