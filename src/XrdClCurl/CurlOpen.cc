@@ -52,20 +52,13 @@ CurlOpenOp::SetOpenProperties()
         m_file->SetProperty("LastURL", url);
     }
 
-    auto hm = m_headers.RefHeaders();
-    ResponseInfo::HeaderValues hv = hm["Etag"];
-    if (!hv.empty())
+    if (!m_headers.GetETag().empty())
     {
-        // std::cout << "ETAG " << hv[0] << "\n";
-        std::string etag = hv[0];
+        std::string etag = m_headers.GetETag();
         etag.erase(remove(etag.begin(), etag.end(), '\"'), etag.end());
         m_file->SetProperty("ETag", etag);
     }
-    hv = hm["Cache-Control"];
-    if (!hv.empty())
-    {
-        m_file->SetProperty("Cache-Control", hv[0]);
-    }
+    m_file->SetProperty("Cache-Control", m_headers.GetCacheControl());
 }
 
 void
