@@ -282,13 +282,21 @@ File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
                 {
                     xatt["revalidate"] = true;
                 }
-                static const std::regex rx("max-age=(\\d+)");
-                std::smatch m;
-                if (std::regex_search(cc, m, rx))
+                size_t fm = cc.find("max-age=");
+                if (fm != std::string::npos)
                 {
-                    long int a = std::stol(m[1]);
-                    time_t t = time(NULL) + a;
-                    xatt["expire"] = t;
+                    fm += 9; // idx of the first character after the make-age= match
+                    for (size_t i = fm; i < cc.length(); i++)
+                    {
+                        if (!std::isdigit(cc[i]))
+                        {
+                            std::string sa = cc.substr(fm, i);
+                            long int a = std::stol(sa);
+                            time_t t = time(NULL) + a;
+                            xatt["expire"] = t;
+                            break;
+                        }
+                    }
                 }
             }
             XrdCl::Buffer *respBuff = new XrdCl::Buffer();
