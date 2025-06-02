@@ -23,7 +23,6 @@
 #include "../common/CurlResponseInfo.hh"
 #include "../common/CurlResponses.hh"
 
-#include <iostream>
 using namespace XrdClCurl;
 
 CurlOpenOp::CurlOpenOp(XrdCl::ResponseHandler *handler, const std::string &url, struct timespec timeout,

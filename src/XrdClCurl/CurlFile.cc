@@ -309,34 +309,34 @@ File::Fcntl(const XrdCl::Buffer &arg, XrdCl::ResponseHandler *handler,
         //
         else if (code == XrdCl::QueryCode::Stats)
         {
-             m_logger->Error(kLogXrdClCurl, "Server status query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            m_logger->Error(kLogXrdClCurl, "Server status query not supported.");
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else if (code == XrdCl::QueryCode::Checksum || code == XrdCl::QueryCode::ChecksumCancel)
         {
-             m_logger->Error(kLogXrdClCurl, "Checksum query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            m_logger->Error(kLogXrdClCurl, "Checksum query not supported.");
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else if (code == XrdCl::QueryCode::Config)
         {
             m_logger->Error(kLogXrdClCurl, "Server configuration query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else if (code == XrdCl::QueryCode::Space)
         {
             m_logger->Error(kLogXrdClCurl, "Local space stats query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else if (code == XrdCl::QueryCode::Opaque || code == XrdCl::QueryCode::OpaqueFile)
         {
             // XrdCl implementation dependent
             m_logger->Error(kLogXrdClCurl, "Opaque query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else if (code == XrdCl::QueryCode::Prepare)
         {
             m_logger->Error(kLogXrdClCurl, "Prepare status query not supported.");
-             return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
+            return XrdCl::XRootDStatus(XrdCl::stError, XrdCl::errInvalidOp);
         }
         else
         {
